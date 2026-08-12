@@ -43,6 +43,32 @@ app.get("/feed", async (req, res) => {
     res.status(500).send("Error fetching feed");
   }
 });
+
+app.put("/user/:id", async(req, res)=>{
+  console.log("hit")
+  try{
+    const userId = req.params.id;
+    const updatedData = req.body;
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, { new: true });
+    if(!updatedUser) return res.status(404).send("User not found");
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating user");
+  }
+});
+
+app.delete("/user/:id", async(req, res)=>{
+  const userId = req.params.id;
+  try{
+    await userModel.findByIdAndDelete(userId);
+    res.status(200).send("User deleted successfully");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting user");
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Hello World");
 });
