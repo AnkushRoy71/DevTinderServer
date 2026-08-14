@@ -11,12 +11,13 @@ app.post("/signup", async (req, res) => {
   const user = req.body;
   if (!user) return res.status(400).send("User data is required");
   const newUser = new userModel(user);
+  console.log(newUser);
   try {
     await newUser.save();
     res.status(201).send("User created successfully");
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error creating user");
+    res.status(500).send("Error creating user" + err.message);
   }
 });
 
@@ -44,12 +45,12 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.put("/user/:id", async(req, res)=>{
+app.patch("/user/:id", async(req, res)=>{
   console.log("hit")
   try{
     const userId = req.params.id;
     const updatedData = req.body;
-    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, { new: true });
+    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, { new: true, runValidators: true });
     if(!updatedUser) return res.status(404).send("User not found");
     res.status(200).json(updatedUser);
   } catch (err) {
