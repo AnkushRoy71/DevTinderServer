@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { isContains } = require("../config/validation");
+const { isContains } = require("../utils/validation");
 
 const userSchema = new mongoose.Schema({
     firstName:{
@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
     },
     age:{
         type: Number,
+        required: true,
         min: 18
     },
     email:{
@@ -43,6 +44,7 @@ const userSchema = new mongoose.Schema({
     },
     gender:{
         type: String,
+        required: true,
         validate:{
             validator(value){
                 if(!isContains(value, ["male", "female", "other"])){

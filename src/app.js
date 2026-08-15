@@ -2,23 +2,50 @@ const express = require("express");
 const dotenv = require("dotenv").config();
 const connectDB = require("./config/database");
 const userModel = require("./models/user");
+const { isRequestBodyValid } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
 app.use(express.json());
 
-app.post("/signup", async (req, res) => {
-  const user = req.body;
-  if (!user) return res.status(400).send("User data is required");
-  const newUser = new userModel(user);
-  console.log(newUser);
-  try {
-    await newUser.save();
-    res.status(201).send("User created successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error creating user" + err.message);
+app.post("/login", async(req,res)=>{
+  try{
+    const {email, password} = req.body;
+    if(!email || !password) throw new Error("Email and password are required");
+    const user = await userModel.findOne({email});
+    if(!user) throw new Error("Invalid credentials");
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if(!isPasswordValid) throw new Error("Invalid credentials");
+    res.status(200).send("User logged in successfully");
   }
+  catch(err){
+    res.status(500).send("Error logging in user" + err.message);
+  }
+})
+
+app.post("/signup", async (req, res) => {
+    try {
+      const user = req.body;
+      if (!user || !isRequestBodyValid(user))
+        throw new Error("User data is invalid");
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+      const newUser = new userModel({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        age: user.age,
+        email: user.email,
+        password: hashedPassword,
+        gender: user.gender
+      });
+      console.log(newUser);
+      await newUser.save();
+      res.status(201).send("User created successfully");
+    } catch (err) {
+      console.error(err);
+      res.status(500).send("Error creating user" + err.message);
+    }
 });
 
 app.get("/user", async (req, res) => {
