@@ -8,7 +8,8 @@ const userAuth = async(req,res,next)=>{
             throw new Error("Invalid User");
         }
         const decodedToken = await jwt.verify(token,'Dev@Tinder#1234');
-        const user = await userModel.findById(decodedToken);
+        console.log(decodedToken)
+        const user = await userModel.findById(decodedToken.id);
         if(!user){
             throw new Error("Invalid User");
         }
@@ -16,7 +17,7 @@ const userAuth = async(req,res,next)=>{
         next();
     }
     catch(err){
-        res.status(401).send(err);
+        res.status(401).send(err.message);
     }
 }
 
