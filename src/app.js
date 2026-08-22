@@ -22,10 +22,10 @@ app.post("/login", async(req,res)=>{
     if(!email || !password) throw new Error("Email and password are required");
     const user = await userModel.findOne({email});
     if(!user) throw new Error("Invalid credentials");
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.hashedPassword(password);
     if(!isPasswordValid) throw new Error("Invalid credentials");
-    const jwtToken = await jwt.sign(user.id,'Dev@Tinder#1234');
-    res.cookie('token',jwtToken);
+    const jwtToken = await user.getJWT();
+    res.cookie('token',jwtToken,{expires: new Date(Date.now() + 3600000), httpOnly: true});
     res.status(200).send("User logged in successfully");
   }
   catch(err){
@@ -60,8 +60,8 @@ app.post("/signup", async (req, res) => {
 app.get("/user",userAuth, async (req, res) => {
   try {
     const emailId = req.body.email;
-    if (!emailId) return res.status(400).send("Email is required");
-    const users = await userModel.find({ email: emailId });
+    // if (!emailId) return res.status(400).send("Email is required");
+    const users = req.user;
     if (users.length === 0) return res.status(404).send("User not found");
     res.status(200).json(users);
   } catch (err) {
