@@ -1,3 +1,5 @@
+const validator = require('validator')
+
 const isContains = (value, allowedValues)=>{
     if(!allowedValues.includes(value)){
         return false;
@@ -5,7 +7,11 @@ const isContains = (value, allowedValues)=>{
     return true;
 }
 
-const isValidEmail = (email)=>{
+const isPasswordStrong = (newPassword)=>{
+    if (!validator.isStrongPassword(newPassword)) {
+      return new Error("Password is not strong enough");
+    }
+    return true
 }
 
 const isRequestBodyValid = (req)=>{
@@ -16,8 +22,20 @@ const isRequestBodyValid = (req)=>{
     return true;
 }
 
+const isUpdateUserValid = (updateData) => {
+    const fieldsAllowedToEdit = ['firstName','lastName','gender','age']
+    const isValid = Object.keys(updateData).every((key)=>{
+        return fieldsAllowedToEdit.includes(key)
+    })
+    if(isValid) return true;
+    else false;
+};
+
+
+
 module.exports = {
-    isContains,
-    isValidEmail,
-    isRequestBodyValid
-}
+  isContains,
+  isPasswordStrong,
+  isRequestBodyValid,
+  isUpdateUserValid,
+};

@@ -1,6 +1,7 @@
 const userRouter = require("express").Router();
 const { userAuth } = require("../middlewares/userAuth.js");
 const userModel = require("../models/user.js");
+const { isUpdateUserValid } = require('../utils/validation')
 
 userRouter.get("/feed", async (req, res) => {
   try {
@@ -15,8 +16,6 @@ userRouter.get("/feed", async (req, res) => {
 
 userRouter.get("/user", userAuth, async (req, res) => {
   try {
-    const emailId = req.body.email;
-    // if (!emailId) return res.status(400).send("Email is required");
     const users = req.user;
     if (users.length === 0) return res.status(404).send("User not found");
     res.status(200).json(users);
@@ -26,11 +25,12 @@ userRouter.get("/user", userAuth, async (req, res) => {
   }
 });
 
-userRouter.patch("/user/:id", async (req, res) => {
-  console.log("hit");
+userRouter.patch("/user",userAuth, async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.user.id;
     const updatedData = req.body;
+    console.log(updatedData)
+    if(!isUpdateUserValid(updatedData)) throw new Error('Invalid data')
     const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, {
       new: true,
       runValidators: true,
@@ -38,8 +38,7 @@ userRouter.patch("/user/:id", async (req, res) => {
     if (!updatedUser) return res.status(404).send("User not found");
     res.status(200).json(updatedUser);
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Error updating user");
+    res.status(500).send("Error updating user " + err.message);
   }
 });
 

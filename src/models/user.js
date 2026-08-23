@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { isContains } = require("../utils/validation");
+const { isContains, isPasswordStrong } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -38,9 +38,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         validate:{
             validator(value){
-                if(!validator.isStrongPassword(value)){
-                    throw new Error("Password is not strong enough");
-                }
+                return isPasswordStrong(value);
             }
         }
     },
@@ -64,10 +62,16 @@ userSchema.methods.getJWT = async function(){
     return token;
 };
 
-userSchema.methods.hashedPassword = async function(password){
-    const isPasswordValid = await bcrypt.compare(password, this.password);
-    return isPasswordValid;
+userSchema.methods.hashedPassword = async function(){
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(this.password, saltRounds);
+      return hashedPassword;
 }
+
+userSchema.methods.isPasswordValid = async function (password) {
+  const isPasswordValid = await bcrypt.compare(password, this.password);
+  return isPasswordValid;
+};
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
