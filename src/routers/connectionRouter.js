@@ -27,7 +27,7 @@ connectionRouter.post('/:status/:receiverId',userAuth,(req, res)=>{
         })
 
         if(isPrevRequestExists){
-            res.status(400).send('connection already exists');
+            return res.status(400).send('connection already exists');
         }
     
         const connection = new ConnectionRequest({
