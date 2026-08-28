@@ -27,6 +27,9 @@ connectionRequestSchema.pre('save', function(){
   next();
 })
 
+connectionRequestSchema.index({senderId:1, renderId:1});
+connectionRequestSchema.index({status:1});
+
 const ConnectionRequest = mongoose.model(
   "ConnectionRequest",
   connectionRequestSchema,

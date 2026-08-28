@@ -23,10 +23,11 @@ connectionRouter.post('/:status/:receiverId',userAuth,async (req, res)=>{
 
 
         const isPrevRequestExists = await ConnectionRequest.findOne({
-            $or: [
-                {senderId: user._id, receiverId: receiverId} , {receiverId: user._id, senderId: receiverId}
-            ]
-        })
+          $or: [
+            { senderId: user._id, receiverId: receiverId },
+            { senderId: receiverId, receiverId: user._id },
+          ],
+        });
 
 
         if(isPrevRequestExists){
