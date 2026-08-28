@@ -2,8 +2,9 @@ const express = require('express');
 const { userAuth } = require('../middlewares/userAuth');
 const connectionRouter = express.Router();
 const ConnectionRequest = require('../models/connectionRequest')
+const User = require("../models/user")
 
-connectionRouter.post('/:status/:receiverId',userAuth,(req, res)=>{
+connectionRouter.post('/:status/:receiverId',userAuth,async (req, res)=>{
     try{
 
         const user = req.user;
@@ -15,16 +16,18 @@ connectionRouter.post('/:status/:receiverId',userAuth,(req, res)=>{
             throw new Error('status not allowed');
         }
     
-        const receiver = ConnectionRequest.findById(receiverId);
+        const receiver = await User.findById(receiverId);
         if(!receiver){
             throw new Error('Receiver is not part of us');
         }
 
-        const isPrevRequestExists = ConnectionRequest.findOne({
+
+        const isPrevRequestExists = await ConnectionRequest.findOne({
             $or: [
                 {senderId: user._id, receiverId: receiverId} , {receiverId: user._id, senderId: receiverId}
             ]
         })
+
 
         if(isPrevRequestExists){
             return res.status(400).send('connection already exists');
@@ -36,7 +39,7 @@ connectionRouter.post('/:status/:receiverId',userAuth,(req, res)=>{
             status: status
         })
     
-        connection.save();
+        await connection.save();
         res.status(200).send('connection sent successfully');
     }
     catch(err){

@@ -15,7 +15,17 @@ const connectionRequestSchema = new mongoose.Schema({
     enum: ['like','dislike','accepted','rejected'],
     required: true
   }
+},{
+  timestamps: true
 });
+
+connectionRequestSchema.pre('save', function(){
+  let connection = this;
+  if (connection.receiverId.equals(connection.senderId)) {
+    throw new Error("Sender and Reciever can't be same person");
+  }
+  next();
+})
 
 const ConnectionRequest = mongoose.model(
   "ConnectionRequest",
