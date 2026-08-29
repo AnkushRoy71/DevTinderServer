@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const connectionRequestSchema = new mongoose.Schema({
   senderId: {
     type: mongoose.Types.ObjectId,
+    ref: "User",
     require: true,
   },
   receiverId: {

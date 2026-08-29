@@ -1,58 +1,25 @@
 const userRouter = require("express").Router();
-const { userAuth } = require("../middlewares/userAuth.js");
-const userModel = require("../models/user.js");
-const { isUpdateUserValid } = require('../utils/validation')
+const {userAuth} = require("../middlewares/userAuth");
+const ConnectionRequest = require("../models/connectionRequest")
 
-userRouter.get("/feed", async (req, res) => {
-  try {
-    const feed = await userModel.find();
-    if (feed.length === 0) return res.status(404).send("No feed available");
-    res.status(200).json(feed);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching feed");
-  }
-});
+userRouter.get("/users/request", userAuth, async (req, res)=>{
+    try{
 
-userRouter.get("/user", userAuth, async (req, res) => {
-  try {
-    const users = req.user;
-    if (users.length === 0) return res.status(404).send("User not found");
-    res.status(200).json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching users");
-  }
-});
+        const user = req.user;
+    
+        const connectionRequest = await ConnectionRequest.find({
+            receiverId: user._id,
+            status: 'like'
+        }).populate("senderId", ["firstName", "lastName", "age", "gender"])
+    
+        return res.json({
+            message:"Connections fetched successfully",
+            data: connectionRequest
+        })
+    }
+    catch(err){
+        return res.status(400).send("something went wrong "+ err.message);
+    }
+})
 
-userRouter.patch("/user",userAuth, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const updatedData = req.body;
-    console.log(updatedData)
-    if(!isUpdateUserValid(updatedData)) throw new Error('Invalid data')
-    const updatedUser = await userModel.findByIdAndUpdate(userId, updatedData, {
-      new: true,
-      runValidators: true,
-    });
-    if (!updatedUser) return res.status(404).send("User not found");
-    res.status(200).json(updatedUser);
-  } catch (err) {
-    res.status(500).send("Error updating user " + err.message);
-  }
-});
-
-userRouter.delete("/user/:id", async (req, res) => {
-  const userId = req.params.id;
-  try {
-    await userModel.findByIdAndDelete(userId);
-    res.status(200).send("User deleted successfully");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error deleting user");
-  }
-});
-
-module.exports = {
-    userRouter
-}
+module.exports = userRouter;
