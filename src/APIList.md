@@ -10,10 +10,10 @@ Profile
  PATCH /user/edit
 
 Connections
- POST /request/like/:senderID
- POST /request/dislike/:senderID
- POST /request/accepted/:receiverID
- POST /request/rejected/:receiverID
+ POST /request/like/:receiverID
+ POST /request/dislike/:receiverID
+ POST review/request/accepted/:requestID
+ POST review/request/rejected/:requestID
 
 User
  GET /users/connections
