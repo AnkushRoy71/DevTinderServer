@@ -1,6 +1,7 @@
 const userRouter = require("express").Router();
 const {userAuth} = require("../middlewares/userAuth");
-const ConnectionRequest = require("../models/connectionRequest")
+const ConnectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 
 userRouter.get("/users/request", userAuth, async (req, res)=>{
     try{
@@ -51,5 +52,36 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
     return res.status(400).send("something went wrong " + err.message);
   }
 });
+
+userRouter.get("/users/feed", userAuth, async(req, res)=>{
+  try{
+    const user = req.user;
+  
+    const allConnections = await ConnectionRequest.find({
+      $or: [{ senderId: user._id }, { receiverId: user._id }],
+    }).select("senderId receiverId");
+  
+    const hideUsers =  new Set();
+  
+    allConnections.forEach((connection)=>{
+      hideUsers.add(connection.senderId);
+      hideUsers.add(connection.receiverId);
+    });
+  
+    hideUsers.add(user._id);
+  
+    const allowedUsers = await User.find({
+      _id: {$nin: Array.from(hideUsers)}
+    }).select("firstName lastName age gender")
+
+    return res.json({
+      message: "Data fetched Successfully",
+      data: allowedUsers
+    })
+  }
+  catch(err){
+    return res.status(400).send("Something went wrong "+ err.message);
+  }
+})
 
 module.exports = userRouter;
