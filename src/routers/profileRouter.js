@@ -3,16 +3,16 @@ const { userAuth } = require("../middlewares/userAuth.js");
 const userModel = require("../models/user.js");
 const { isUpdateUserValid } = require('../utils/validation.js')
 
-profileRouter.get("/feed", async (req, res) => {
-  try {
-    const feed = await userModel.find();
-    if (feed.length === 0) return res.status(404).send("No feed available");
-    res.status(200).json(feed);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error fetching feed");
-  }
-});
+// profileRouter.get("/feed", async (req, res) => {
+//   try {
+//     const feed = await userModel.find();
+//     if (feed.length === 0) return res.status(404).send("No feed available");
+//     res.status(200).json(feed);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Error fetching feed");
+//   }
+// });
 
 profileRouter.get("/user", userAuth, async (req, res) => {
   try {
