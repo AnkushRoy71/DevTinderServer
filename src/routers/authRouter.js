@@ -18,9 +18,12 @@ authRouter.post("/login", async (req, res) => {
       expires: new Date(Date.now() + 3600000),
       httpOnly: true,
     });
-    res.status(200).send("User logged in successfully");
+    res.status(200).send({
+      message: "User logged in successfully",
+      data: user
+    });
   } catch (err) {
-    res.status(500).send("Error logging in user" + err.message);
+    res.status(500).send({error: "Error logging in user" + err.message});
   }
 });
 
