@@ -53,8 +53,8 @@ authRouter.post("/signup", async (req, res) => {
 
 authRouter.get('/logout',(req, res)=>{
   res.cookie('token', null, {expires: new Date().now, httpOnly:true});
-  res.status(200).send("logout successfull")
-})
+  res.status(200).send({ message: "Logout successful" });
+});
 
 authRouter.patch('/forgotPassword',userAuth,async (req, res)=>{
   try{
