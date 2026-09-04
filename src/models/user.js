@@ -4,58 +4,70 @@ const { isContains, isPasswordStrong } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const userSchema = new mongoose.Schema({
-    firstName:{
-        type: String,
-        required: true,
-        minlength: 2,
-        maxlength: 50
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minlength: 2,
+      maxlength: 50,
     },
-    lastName:{
-        type: String,
-        minlength: 2,
-        maxlength: 50
+    lastName: {
+      type: String,
+      minlength: 2,
+      maxlength: 50,
     },
-    age:{
-        type: Number,
-        required: true,
-        min: 18
+    age: {
+      type: Number,
+      required: true,
+      min: 18,
     },
-    email:{
-        type: String,
-        required: true,
-        unique: true,
-        validate:{
-            validator(value){
-                if(!validator.isEmail(value)){
-                    throw new Error("Invalid email format");
-                }
-            }
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator(value) {
+          if (!validator.isEmail(value)) {
+            throw new Error("Invalid email format");
+          }
+        },
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      validate: {
+        validator(value) {
+          return isPasswordStrong(value);
+        },
+      },
+    },
+    gender: {
+      type: String,
+      required: true,
+      validate: {
+        validator(value) {
+          if (!isContains(value, ["male", "female", "other"])) {
+            throw new Error("Invalid gender value");
+          }
+        },
+      },
+    },
+    photoUrl: {
+      type: String,
+      default: "https://geographyandyou.com/images/user-profile.png",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo URL: " + value);
         }
+      },
     },
-    password:{
-        type: String,
-        required: true,
-        validate:{
-            validator(value){
-                return isPasswordStrong(value);
-            }
-        }
-    },
-    gender:{
-        type: String,
-        required: true,
-        validate:{
-            validator(value){
-                if(!isContains(value, ["male", "female", "other"])){
-                    throw new Error("Invalid gender value");
-                }
-            }
-        }
-    },
-},{
-    timestamps: true
-});
+  },
+  {
+    timestamps: true,
+  },
+);
 
 userSchema.methods.getJWT = async function(){
     const token = await jwt.sign({ id: this._id }, 'Dev@Tinder#1234');
