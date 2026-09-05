@@ -62,7 +62,15 @@ const userSchema = new mongoose.Schema(
           throw new Error("Invalid Photo URL: " + value);
         }
       },
-    },
+    },  
+    about:{
+      type: String,
+      maxlength: 500,
+      default: "Hey there! I am using DevTinder.",
+      validate(value) {
+        return validator.escape(value);
+      }
+    }
   },
   {
     timestamps: true,

@@ -23,7 +23,7 @@ const isRequestBodyValid = (req)=>{
 }
 
 const isUpdateUserValid = (updateData) => {
-    const fieldsAllowedToEdit = ['firstName','lastName','gender','age']
+    const fieldsAllowedToEdit = ['firstName','lastName','gender','age', 'photoUrl', 'about'];
     const isValid = Object.keys(updateData).every((key)=>{
         return fieldsAllowedToEdit.includes(key)
     })
