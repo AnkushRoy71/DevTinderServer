@@ -31,7 +31,7 @@ connectionRouter.post('/request/:status/:receiverId',userAuth,async (req, res)=>
 
 
         if(isPrevRequestExists){
-            return res.status(400).send('connection already exists');
+            throw new Error('connection already exists');
         }
     
         const connection = new ConnectionRequest({
@@ -41,10 +41,10 @@ connectionRouter.post('/request/:status/:receiverId',userAuth,async (req, res)=>
         })
     
         await connection.save();
-        res.status(200).send('connection sent successfully');
+        res.status(200).send({message:'connection sent successfully', data:null});
     }
     catch(err){
-        res.status(400).send('error sending connection request '+ err.message)
+        res.status(400).send({message:'error sending connection request ',error: err.message})
     }
 });
 
@@ -58,7 +58,7 @@ connectionRouter.post("/review/request/:status/:requestId", userAuth, async (req
         const allowedStatus = ['accepted', 'rejected'];
 
         if(!allowedStatus.includes(status)){
-            return res.status(400).send(`${status} is not a valid status`);
+            throw Error(`${status} is not a valid status`);
         }
     
         const connectionRequest = await ConnectionRequest.findOne({
@@ -68,16 +68,16 @@ connectionRouter.post("/review/request/:status/:requestId", userAuth, async (req
         });
     
         if (!connectionRequest) {
-          return res.status(400).send("Not a valid request");
+           throw Error("Not a valid request");
         };
 
         connectionRequest.status = status;
         await connectionRequest.save();
 
-        return res.status(200).send("Connection accepted");
+        return res.status(200).send({message:"Connection accepted", data:null});
     }
     catch(err){
-        return res.status(400).send("something went wrong "+ err.message);
+        return res.status(400).send({message:"something went wrong ", error: err.message});
     }
 
 });
