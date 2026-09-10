@@ -9,9 +9,16 @@ userRouter.get("/users/request", userAuth, async (req, res)=>{
         const user = req.user;
     
         const connectionRequest = await ConnectionRequest.find({
-            receiverId: user._id,
-            status: 'like'
-        }).populate("senderId", ["firstName", "lastName", "age", "gender"])
+          receiverId: user._id,
+          status: "like",
+        }).populate("senderId", [
+          "firstName",
+          "lastName",
+          "age",
+          "gender",
+          "photoUrl",
+          "about",
+        ]);
     
         return res.json({
             message:"Connections fetched successfully",
@@ -34,8 +41,22 @@ userRouter.get("/users/connections", userAuth, async (req, res) => {
         { receiverId: user._id, status: "accepted" },
       ],
     })
-      .populate("senderId", ["firstName", "lastName", "age", "gender"])
-      .populate("receiverId", ["firstName", "lastName", "age", "gender"]);
+      .populate("senderId", [
+        "firstName",
+        "lastName",
+        "age",
+        "gender",
+        "photoUrl",
+        "about",
+      ])
+      .populate("receiverId", [
+        "firstName",
+        "lastName",
+        "age",
+        "gender",
+        "photoUrl",
+        "about",
+      ]);
 
     const data = connectionRequest.map((row)=>{
         if(row.senderId._id.toString() === user._id.toString()){
