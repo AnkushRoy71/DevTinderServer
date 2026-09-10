@@ -1,9 +1,8 @@
-const authRouter = require('express').Router();
-const { userAuth } = require('../middlewares/userAuth.js');
-const userModel = require('../models/user.js');
+const authRouter = require("express").Router();
+const { userAuth } = require("../middlewares/userAuth.js");
+const userModel = require("../models/user.js");
 const { isRequestBodyValid, isPasswordStrong } = require("../utils/validation");
 const bcrypt = require("bcrypt");
-
 
 authRouter.post("/login", async (req, res) => {
   try {
@@ -20,59 +19,65 @@ authRouter.post("/login", async (req, res) => {
     });
     res.status(200).send({
       message: "User logged in successfully",
-      data: user
+      data: user,
     });
   } catch (err) {
-    res.status(500).send({error: "Error logging in user" + err.message});
+    res.status(500).send({ error: "Error logging in user" + err.message });
   }
 });
 
 authRouter.post("/signup", async (req, res) => {
-    try {
-      const user = req.body;
-      if (!user || !isRequestBodyValid(user))
-        throw new Error("User data is invalid");
-      const newUser = new userModel({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        age: user.age,
-        email: user.email,
-        password: user.password,
-        gender: user.gender
-      });
-      console.log(newUser)
-      const hashedPassword = await newUser.hashedPassword();
-      newUser.password = hashedPassword;
-      await newUser.save();
-      res.status(201).send("User created successfully");
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Error creating user " + err.message);
-    }
+  try {
+    const user = req.body;
+    if (!user || !isRequestBodyValid(user))
+      throw new Error("User data is invalid");
+    const newUser = new userModel({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      age: user.age,
+      email: user.email,
+      password: user.password,
+      gender: user.gender,
+    });
+    console.log(newUser);
+    const hashedPassword = await newUser.hashedPassword();
+    newUser.password = hashedPassword;
+    await newUser.save();
+    const jwtToken = await newUser.getJWT();
+    res.cookie("token", jwtToken, {
+      expires: new Date(Date.now() + 3600000),
+      httpOnly: true,
+    });
+    res.status(201).send({message: "User created successfully", data: newUser});
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .send({ message: "Error creating user ", error: err.message });
+  }
 });
 
-authRouter.get('/logout',(req, res)=>{
-  res.cookie('token', null, {expires: new Date().now, httpOnly:true});
+authRouter.get("/logout", (req, res) => {
+  res.cookie("token", null, { expires: new Date().now, httpOnly: true });
   res.status(200).send({ message: "Logout successful" });
 });
 
-authRouter.patch('/forgotPassword',userAuth,async (req, res)=>{
-  try{
+authRouter.patch("/forgotPassword", userAuth, async (req, res) => {
+  try {
     const user = req.user;
-    const {password}  = req.body;
-    if(isPasswordStrong(password)){
+    const { password } = req.body;
+    if (isPasswordStrong(password)) {
       user.password = password;
       const newHashedPassword = await user.hashedPassword(password);
       user.password = newHashedPassword;
       user.save();
       res.status(200).send("password reset succesfull");
     }
-  }
-  catch(err){
+  } catch (err) {
     res.status(400).send("Error updating password " + err.message);
   }
-})
+});
 
 module.exports = {
-    authRouter
-}
+  authRouter,
+};
