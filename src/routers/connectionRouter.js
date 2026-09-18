@@ -3,6 +3,8 @@ const { userAuth } = require('../middlewares/userAuth');
 const connectionRouter = express.Router();
 const ConnectionRequest = require('../models/connectionRequest')
 const User = require("../models/user")
+const {emailQueue} = require('../utils/connection');
+const { delay } = require('bullmq');
 
 connectionRouter.post('/request/:status/:receiverId',userAuth,async (req, res)=>{
     try{
@@ -40,8 +42,11 @@ connectionRouter.post('/request/:status/:receiverId',userAuth,async (req, res)=>
             status: status
         })
     
+        await emailQueue.add('emails',{connection},{delay: 2 * 60 * 1000});
         await connection.save();
+        console.log('hi')
         res.status(200).send({message:'connection sent successfully', data:null});
+
     }
     catch(err){
         res.status(400).send({message:'error sending connection request ',error: err.message})
