@@ -42,7 +42,7 @@ connectionRouter.post('/request/:status/:receiverId',userAuth,async (req, res)=>
             status: status
         })
     
-        await emailQueue.add('emails',{connection},{delay: 2 * 60 * 1000});
+        await emailQueue.add('send-email',{connection},{delay: 2 * 60 * 1000});
         await connection.save();
         console.log('hi')
         res.status(200).send({message:'connection sent successfully', data:null});

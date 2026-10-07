@@ -7,10 +7,14 @@ const { profileRouter } = require("./routers/profileRouter");
 const {connectionRouter} = require("./routers/connectionRouter")
 const userRouter = require("./routers/userRouter")
 const cors = require('cors');
+const http = require('http');
+const { initializeSocket } = require("./utils/socket");
 require('./utils/emailWorkers')
 //require("./utils/cronJobs");
 
 const app = express();
+const server = http.createServer(app);
+initializeSocket(server);
 
 app.use(cors({
   origin: 'http://localhost:4200',
@@ -37,7 +41,7 @@ app.use('/',userRouter);
 
 connectDB()
   .then(() => {
-    app.listen(3000, () => {
+    server.listen(3000, () => {
       console.log("Server running on port 3000");
     });
   })
