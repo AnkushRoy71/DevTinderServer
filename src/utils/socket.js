@@ -1,15 +1,17 @@
 const socketIO = require("socket.io");
+const { createAdapter } = require("@socket.io/redis-adapter");
 
 const createRoomId = (senderId, receiverId) =>
   `chat_${[String(senderId), String(receiverId)].sort().join("_")}`;
 
-const initializeSocket = (server) => {
+const initializeSocket = (server, pubClient, subClient) => {
     const io = socketIO(server, {
         cors:{
             origin: 'http://localhost:4200',
             credentials: true,
         }
     })
+    io.adapter(createAdapter(pubClient, subClient));
 
     io.on("connection", (socket) => {
       console.log("A user connected");
@@ -38,7 +40,7 @@ const initializeSocket = (server) => {
 
         const roomId = createRoomId(senderId, receiverId);
         console.log(`Sending message to room: ${roomId}`);
-        io.to(roomId).emit("receiveMessage", { senderId, receiverId, message });
+        io.to(roomId).emit("receiveMessage", { senderId, receiverId, roomId, message });
       });
 
       socket.on("disconnect", () => {
